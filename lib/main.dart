@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/routing/app_router.dart';
 import 'core/network/api_client.dart';
 
+import 'core/theme/theme_provider.dart';
+
 void main() {
   configureDio();
   runApp(
@@ -20,6 +22,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Escuchamos los cambios del router
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeProvider);
 
     return MaterialApp.router(
       title: 'Gestión Gastos',
@@ -38,8 +41,9 @@ class MyApp extends ConsumerWidget {
         ),
         useMaterial3: true,
       ),
-      themeMode: ThemeMode.system, // Cambia según el tema del sistema
+      themeMode: themeMode, // Cambia según el themeProvider
       routerConfig: router,
     );
   }
 }
+

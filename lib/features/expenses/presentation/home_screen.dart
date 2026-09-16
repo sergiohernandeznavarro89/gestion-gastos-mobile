@@ -56,12 +56,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
                 if (effectiveFilter == HomeFilter.pendientes)
                   PendingItemsList(
+                    key: const ValueKey('pendientes'),
                     currentMonthItems: data.currentMonthItems,
                     nextMonthItems: data.nextMonthItems,
                     hideNextMonth: false,
                   )
                 else ...[
                   PendingItemsList(
+                    key: const ValueKey('realizados'),
                     currentMonthItems: data.executedItems,
                     nextMonthItems: const [],
                     hideNextMonth: true,

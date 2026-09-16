@@ -15,6 +15,7 @@ class CategoriesScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Categorías'),
+        centerTitle: true,
       ),
       body: categoriesAsync.when(
         data: (categories) {
@@ -30,57 +31,9 @@ class CategoriesScreen extends ConsumerWidget {
               final cat = categories[index];
               final mySubcategories = allSubcategories.where((s) => s.categoryId == cat.categoryId).toList();
 
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: ExpansionTile(
-                  leading: const CircleAvatar(child: Icon(Icons.category)),
-                  title: Text(cat.categoryDesc, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  childrenPadding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () => _showCategoryDialog(context, cat),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _confirmDeleteCategory(context, ref, cat.categoryId),
-                      ),
-                      const Icon(Icons.expand_more), // The default expand icon for ExpansionTile
-                    ],
-                  ),
-                  children: [
-                    if (mySubcategories.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text('No hay subcategorías', style: TextStyle(fontStyle: FontStyle.italic)),
-                      ),
-                    ...mySubcategories.map((sub) => ListTile(
-                          leading: const Icon(Icons.subdirectory_arrow_right),
-                          title: Text(sub.subCategoryDesc),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
-                                onPressed: () => _showSubcategoryDialog(context, cat.categoryId, sub),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                                onPressed: () => _confirmDeleteSubcategory(context, ref, sub.subCategoryId),
-                              ),
-                            ],
-                          ),
-                        )),
-                    const SizedBox(height: 8),
-                    TextButton.icon(
-                      onPressed: () => _showSubcategoryDialog(context, cat.categoryId, null),
-                      icon: const Icon(Icons.add),
-                      label: const Text('Añadir Subcategoría'),
-                    ),
-                  ],
-                ),
+              return _CategoryItem(
+                category: cat,
+                subcategories: mySubcategories,
               );
             },
           );
@@ -89,67 +42,179 @@ class CategoriesScreen extends ConsumerWidget {
         error: (err, stack) => Center(child: Text('Error: $err')),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showCategoryDialog(context, null),
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) => const CategoryFormDialog(categoryToEdit: null),
+          );
+        },
         tooltip: 'Añadir Categoría',
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _showCategoryDialog(BuildContext context, dynamic cat) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => CategoryFormDialog(categoryToEdit: cat),
-    );
-  }
+}
 
-  void _showSubcategoryDialog(BuildContext context, int categoryId, dynamic sub) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => SubCategoryFormDialog(categoryId: categoryId, subCategoryToEdit: sub),
-    );
-  }
+class _CategoryItem extends ConsumerStatefulWidget {
+  final dynamic category;
+  final List<dynamic> subcategories;
 
-  void _confirmDeleteCategory(BuildContext context, WidgetRef ref, int id) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Borrar Categoría'),
-        content: const Text('¿Eliminar esta categoría?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ref.read(categoryProvider.notifier).deleteCategory(id);
-            },
-            child: const Text('Borrar'),
-          ),
-        ],
+  const _CategoryItem({
+    required this.category,
+    required this.subcategories,
+  });
+
+  @override
+  ConsumerState<_CategoryItem> createState() => _CategoryItemState();
+}
+
+class _CategoryItemState extends ConsumerState<_CategoryItem> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dismissible(
+      key: ValueKey('cat_${widget.category.categoryId}'),
+      direction: DismissDirection.horizontal,
+      background: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: const Icon(Icons.edit, color: Colors.white),
       ),
-    );
-  }
-
-  void _confirmDeleteSubcategory(BuildContext context, WidgetRef ref, int id) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Borrar Subcategoría'),
-        content: const Text('¿Eliminar esta subcategoría?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ref.read(subCategoryProvider.notifier).deleteSubCategory(id);
-            },
-            child: const Text('Borrar'),
-          ),
-        ],
+      secondaryBackground: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          // Swipe hacia la derecha: Editar
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) => CategoryFormDialog(categoryToEdit: widget.category),
+          );
+          return false; // No ocultar el elemento de la lista
+        } else {
+          // Swipe hacia la izquierda: Borrar
+          return await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Borrar Categoría'),
+              content: const Text('¿Eliminar esta categoría?'),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+                FilledButton(
+                  style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Borrar'),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+      onDismissed: (direction) {
+        if (direction == DismissDirection.endToStart) {
+          ref.read(categoryProvider.notifier).deleteCategory(widget.category.categoryId);
+        }
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Column(
+          children: [
+            ListTile(
+              onTap: () {
+                setState(() {
+                  _isExpanded = !_isExpanded;
+                });
+              },
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                child: Icon(Icons.category, color: Theme.of(context).colorScheme.primary),
+              ),
+              title: Text(widget.category.categoryDesc, style: const TextStyle(fontWeight: FontWeight.bold)),
+              trailing: Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
+            ),
+            if (_isExpanded) ...[
+              const Divider(height: 1),
+              if (widget.subcategories.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('No hay subcategorías', style: TextStyle(fontStyle: FontStyle.italic)),
+                ),
+              ...widget.subcategories.map((sub) => Dismissible(
+                    key: ValueKey('sub_${sub.subCategoryId}'),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: const Icon(Icons.delete, color: Colors.white),
+                    ),
+                    confirmDismiss: (direction) async {
+                      return await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Borrar Subcategoría'),
+                          content: const Text('¿Eliminar esta subcategoría?'),
+                          actions: [
+                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+                            FilledButton(
+                              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: const Text('Borrar'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    onDismissed: (direction) {
+                      ref.read(subCategoryProvider.notifier).deleteSubCategory(sub.subCategoryId);
+                    },
+                    child: ListTile(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (context) => SubCategoryFormDialog(categoryId: widget.category.categoryId, subCategoryToEdit: sub),
+                        );
+                      },
+                      contentPadding: const EdgeInsets.only(left: 72, right: 16),
+                      leading: const Icon(Icons.subdirectory_arrow_right, color: Colors.grey),
+                      title: Text(sub.subCategoryDesc),
+                    ),
+                  )),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
+                child: TextButton.icon(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (context) => SubCategoryFormDialog(categoryId: widget.category.categoryId, subCategoryToEdit: null),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Añadir Subcategoría'),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

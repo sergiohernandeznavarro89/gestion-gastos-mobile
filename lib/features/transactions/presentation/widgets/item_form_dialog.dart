@@ -85,7 +85,7 @@ class _ItemFormDialogState extends ConsumerState<ItemFormDialog> {
         'endDate': _endDate.toIso8601String(),
         'categoryId': _selectedCategoryId,
         'subCategoryId': _selectedSubCategoryId,
-        'itemTypeId': widget.isIncome ? 2 : 1,
+        'itemTypeId': widget.isIncome ? 1 : 2,
         'ammountTypeId': _ammountTypeId,
         'periodTypeId': 2, // 2 = Recurrente
         'accountId': _accountId,

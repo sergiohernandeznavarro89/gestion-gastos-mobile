@@ -10,6 +10,9 @@ class AccountSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Escuchar cambios de tema explícitamente para forzar el repintado
+    final theme = Theme.of(context);
+    
     if (accounts.isEmpty) {
       return const Padding(
         padding: EdgeInsets.all(16.0),

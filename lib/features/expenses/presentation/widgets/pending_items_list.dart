@@ -27,6 +27,9 @@ class _PendingItemsListState extends ConsumerState<PendingItemsList> {
 
   @override
   Widget build(BuildContext context) {
+    // Escuchar cambios de tema explícitamente para forzar el repintado
+    final theme = Theme.of(context);
+    
     return SliverMainAxisGroup(
       slivers: [
         if (!widget.hideNextMonth)
@@ -108,7 +111,7 @@ class _PendingItemsListState extends ConsumerState<PendingItemsList> {
 
   Widget _buildItemTile(BuildContext context, UnifiedPendingItem item, bool isCurrentMonth) {
     final isTransfer = item.type == ItemType.transfer;
-    final isIncome = item.itemTypeId == 2;
+    final isIncome = item.itemTypeId == 1;
     
     Color color;
     if (isTransfer) {
@@ -345,6 +348,6 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(covariant _StickyHeaderDelegate oldDelegate) {
-    return title != oldDelegate.title;
+    return true; // Siempre reconstruir para aplicar cambios de tema inmediatamente
   }
 }

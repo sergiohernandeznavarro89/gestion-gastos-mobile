@@ -84,7 +84,10 @@ class TransactionRepository {
 
   Future<void> addItem(Map<String, dynamic> data) async {
     try {
-      await dio.post('/Item/AddItem', data: data);
+      final response = await dio.post('/Item/AddItem', data: data);
+      if (response.data != null && response.data['success'] == false) {
+        throw Exception(response.data['message'] ?? 'Error desconocido en la API');
+      }
     } catch (e) {
       throw Exception('Error al registrar transacción: $e');
     }
@@ -92,7 +95,10 @@ class TransactionRepository {
 
   Future<void> updateItem(Map<String, dynamic> data) async {
     try {
-      await dio.put('/Item/UpdateItem', data: data);
+      final response = await dio.put('/Item/UpdateItem', data: data);
+      if (response.data != null && response.data['success'] == false) {
+        throw Exception(response.data['message'] ?? 'Error desconocido en la API');
+      }
     } catch (e) {
       throw Exception('Error al actualizar transacción: $e');
     }
@@ -100,7 +106,10 @@ class TransactionRepository {
 
   Future<void> deleteItem(int itemId) async {
     try {
-      await dio.delete('/Item/DeleteItem/$itemId');
+      final response = await dio.delete('/Item/DeleteItem/$itemId');
+      if (response.data != null && response.data['success'] == false) {
+        throw Exception(response.data['message'] ?? 'Error desconocido en la API');
+      }
     } catch (e) {
       throw Exception('Error al eliminar transacción: $e');
     }

@@ -119,9 +119,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       case TransactionFilter.todos:
         return nonDeleted;
       case TransactionFilter.gastos:
-        return nonDeleted.where((i) => i.type == ItemType.item && i.itemTypeId == 1).toList();
-      case TransactionFilter.ingresos:
         return nonDeleted.where((i) => i.type == ItemType.item && i.itemTypeId == 2).toList();
+      case TransactionFilter.ingresos:
+        return nonDeleted.where((i) => i.type == ItemType.item && i.itemTypeId == 1).toList();
       case TransactionFilter.transferencias:
         return nonDeleted.where((i) => i.type == ItemType.transfer).toList();
     }
@@ -129,7 +129,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
   Widget _buildListItem(BuildContext context, UnifiedPendingItem item) {
     final isTransfer = item.type == ItemType.transfer;
-    final isIncome = item.itemTypeId == 2;
+    final isIncome = item.itemTypeId == 1;
     
     Color color;
     if (isTransfer) {

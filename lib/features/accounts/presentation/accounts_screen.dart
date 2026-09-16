@@ -31,37 +31,60 @@ class AccountsScreen extends ConsumerWidget {
               itemCount: accounts.length,
               itemBuilder: (context, index) {
                 final account = accounts[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
-                    leading: CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                      child: Icon(Icons.account_balance, color: Theme.of(context).colorScheme.primary),
+                return Dismissible(
+                  key: ValueKey(account.accountId),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    title: Text(account.accountName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    subtitle: Text('${account.currentAmmount.toStringAsFixed(2)} €', style: TextStyle(color: account.currentAmmount >= 0 ? Colors.green : Colors.red, fontWeight: FontWeight.w600, fontSize: 16)),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined),
-                          color: Colors.blue,
-                          onPressed: () {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (ctx) => AccountFormDialog(accountToEdit: account),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          color: Colors.red,
-                          onPressed: () => _confirmDelete(context, ref, account.accountId),
-                        ),
-                      ],
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  confirmDismiss: (direction) async {
+                    return await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Confirmar Borrado'),
+                        content: const Text('¿Estás seguro de que quieres borrar esta cuenta?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: const Text('Cancelar'),
+                          ),
+                          FilledButton(
+                            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                            child: const Text('Borrar'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  onDismissed: (direction) {
+                    ref.read(accountsProvider.notifier).deleteAccount(account.accountId);
+                  },
+                  child: Card(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    child: ListTile(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (ctx) => AccountFormDialog(accountToEdit: account),
+                        );
+                      },
+                      contentPadding: const EdgeInsets.all(16),
+                      leading: CircleAvatar(
+                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                        child: Icon(Icons.account_balance, color: Theme.of(context).colorScheme.primary),
+                      ),
+                      title: Text(account.accountName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      subtitle: Text('${account.currentAmmount.toStringAsFixed(2)} €', style: TextStyle(color: account.currentAmmount >= 0 ? Colors.green : Colors.red, fontWeight: FontWeight.w600, fontSize: 16)),
                     ),
                   ),
                 );
@@ -97,27 +120,4 @@ class AccountsScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref, int accountId) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirmar Borrado'),
-        content: const Text('¿Estás seguro de que quieres borrar esta cuenta?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              ref.read(accountsProvider.notifier).deleteAccount(accountId);
-            },
-            child: const Text('Borrar'),
-          ),
-        ],
-      ),
-    );
-  }
 }

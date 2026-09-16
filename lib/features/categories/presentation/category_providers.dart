@@ -32,12 +32,17 @@ class CategoryNotifier extends AsyncNotifier<List<Category>> {
   }
 
   Future<void> deleteCategory(int id) async {
-    await categoryRepository.deleteCategory(id);
-    _reload();
+    final currentList = state.value ?? [];
+    state = AsyncValue.data(currentList.where((c) => c.categoryId != id).toList());
+    try {
+      await categoryRepository.deleteCategory(id);
+    } catch (e) {
+      _reload(); // Revert on error
+      rethrow;
+    }
   }
 
   void _reload() async {
-    state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => _fetch());
   }
 }
@@ -74,12 +79,17 @@ class SubCategoryNotifier extends AsyncNotifier<List<SubCategory>> {
   }
 
   Future<void> deleteSubCategory(int id) async {
-    await categoryRepository.deleteSubCategory(id);
-    _reload();
+    final currentList = state.value ?? [];
+    state = AsyncValue.data(currentList.where((s) => s.subCategoryId != id).toList());
+    try {
+      await categoryRepository.deleteSubCategory(id);
+    } catch (e) {
+      _reload(); // Revert on error
+      rethrow;
+    }
   }
 
   void _reload() async {
-    state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => _fetch());
   }
 }
