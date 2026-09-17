@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'accounts_provider.dart';
+import '../../../core/widgets/custom_spinner.dart';
 import 'widgets/account_form_dialog.dart';
 
 class AccountsScreen extends ConsumerWidget {
@@ -92,7 +94,7 @@ class AccountsScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CustomSpinner()),
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/widgets/custom_spinner.dart';
 import '../../domain/account_models.dart';
 import '../accounts_provider.dart';
 
@@ -133,7 +134,7 @@ class _AccountFormDialogState extends ConsumerState<AccountFormDialog> {
                   FilledButton(
                     onPressed: _isLoading ? null : _submit,
                     child: _isLoading 
-                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      ? const SizedBox(width: 16, height: 16, child: CustomSpinner(size: 16, color: Colors.white))
                       : const Text('Guardar'),
                   ),
                 ],

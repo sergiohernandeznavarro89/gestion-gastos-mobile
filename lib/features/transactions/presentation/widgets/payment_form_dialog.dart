@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/widgets/custom_spinner.dart';
 import '../../../categories/presentation/category_providers.dart';
 import '../../data/transaction_repository.dart';
 import '../../../expenses/presentation/home_provider.dart';
@@ -173,8 +174,8 @@ class _PaymentFormDialogState extends ConsumerState<PaymentFormDialog> {
                   },
                   validator: (val) => val == null ? 'Requerido' : null,
                 ),
-                loading: () => const CircularProgressIndicator(),
-                error: (e, _) => Text('Error: $e'),
+                loading: () => const Center(child: CustomSpinner()),
+                error: (error, stack) => Center(child: Text('Error: $error')),
               ),
               const SizedBox(height: 16),
               if (_selectedCategoryId != null)
@@ -204,7 +205,7 @@ class _PaymentFormDialogState extends ConsumerState<PaymentFormDialog> {
                     style: FilledButton.styleFrom(backgroundColor: color),
                     onPressed: _isLoading ? null : _submit,
                     child: _isLoading 
-                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
+                      ? const SizedBox(width: 16, height: 16, child: CustomSpinner(size: 16, color: Colors.white)) 
                       : const Text('Guardar'),
                   ),
                 ],

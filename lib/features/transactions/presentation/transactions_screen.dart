@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'transactions_provider.dart';
+import 'package:intl/intl.dart';
+import 'package:gestion_gastos/core/widgets/custom_spinner.dart';
 import '../data/transaction_repository.dart';
 import '../domain/transaction_models.dart';
 import 'widgets/transfer_form_dialog.dart';
-import 'package:intl/intl.dart';
 import 'widgets/item_form_dialog.dart';
 
 enum TransactionFilter { todos, gastos, ingresos, transferencias }
@@ -67,8 +68,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, st) => Center(child: Text('Error: $e')),
+              loading: () => const Center(child: CustomSpinner()),
+              error: (err, stack) => Center(child: Text('Error: $err')),
             ),
           ),
         ],

@@ -42,10 +42,13 @@ void configureDio() {
 }
 
 String _getBaseUrl() {
-  if (kIsWeb) {
-    // En el navegador, localhost apunta al PC
-    return 'https://localhost:7061/api';
+  if (kDebugMode) {
+    if (kIsWeb) {
+      return 'https://localhost:7061/api';
+    }
+    // En el emulador de Android, 10.0.2.2 es la IP para acceder al localhost del PC
+    return 'https://10.0.2.2:7061/api';
   }
-  // En el emulador de Android, 10.0.2.2 es la IP para acceder al localhost del PC
-  return 'https://10.0.2.2:7061/api';
+  // Producción
+  return 'https://gestiongastosapi.azurewebsites.net/api';
 }
